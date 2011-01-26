@@ -1,0 +1,96 @@
+                                trayion README
+
+Contents
+ 1. About trayion
+ 2. Building trayion
+ 3. Using trayion
+ 4. License/Copyright Information
+ A. Footnotes
+
+
+About trayion
+===============
+
+trayion is meant to be used as an external application for Ion3. trayion
+provides a notification area, or "system tray", in a manner compliant with
+freedesktop.org's System Tray Protocol Specification[1]. This allows trayion
+to serve as a system tray area for recent GNOME and KDE applications, and
+should work for applications from GNOME 2.x and later or KDE 3.x and later.
+
+It behaves like a Window Maker dockapp, so it can be redirected into the
+Ion3 statusbar. It implements FreeDesktop (XEmbed) trayicon protocol, so
+it can show trayicons from Qt4 and gtk2 applications. 
+
+Trayion was based in wmsystray 0.1.1, by Matthew Reppert, but was
+modified to be better suited to the Ion3 statusbar.
+
+trayion is written and maintained by
+Paulo Matias <syscoder at gmail>
+
+trayion's homepage is at <http://code.google.com/p/trayion/>.
+
+
+Building trayion
+==================
+
+To build trayion from source, just type "make" in the top source directory
+(the same directory this file is in). You may need to change the defines in
+Rules.make to match your system; for example, X11 might not be in /usr/X11R6
+(it is on most GNU/Linux systems). You will need the XFree86-devel package
+(or xlibs-devel, or whatever package provides files like
+/usr/X11R6/include/Xlib.h) to compile on package-managed systems like Debian
+and Mandrake.
+
+
+Using trayion
+===============
+
+Just add 'trayion' to your '~/.xinitrc' or '~/.xsession' script.
+
+In order to get adjustable icon sizes with Ion3, you need to disable a
+kludge that comes by default with Ion3. As trayion correctly sets the
+window manager hints, this kludge is not needed.
+
+Copy 'cfg_kludges.lua' from '/etc/ion3' or '/usr/pkg/etc/ion3' or
+'/usr/local/etc/ion3' (depending in your Ion3 installation) to your
+'~/.ion3' directory. Then change the following lines in the
+'~/.ion3/cfg_kludges.lua' file:
+
+   defwinprop{
+       is_dockapp = true,
+       statusbar = "systray",
+       max_size = { w = 64, h = 64},
+       min_size = { w = 64, h = 64},
+   }
+
+to:
+
+   defwinprop{
+       is_dockapp = true,
+       statusbar = "systray",
+       --max_size = { w = 64, h = 64},
+       --min_size = { w = 64, h = 64},
+   }
+   
+Now you can control the icon size using the trayion '-iconsize' command
+line argument. The default size is 14 pixels.
+
+
+License/Copyright Information
+==============================
+
+trayion is licensed under the GNU General Public License, version 2. No
+other version of the GPL is allowed.
+
+
+Footnotes
+=========
+
+[1] http://freedesktop.org/Standards/systemtray-spec
+  However, to support most interesting functionality, system trays also need
+  to implement the "server" side of XEMBED, and really should know about
+  the Extended Window Manager Hints specification, or EMWH, also knows as
+  NetWM.
+
+  XEMBED - http://freedesktop.org/Standards/xembed-spec
+  EMWH - http://www.freedesktop.org/standards/wm-spec

@@ -1,0 +1,29 @@
+.TH trayion 1 "27 May 2008" "trayion 0.1.1" ""
+.SH NAME
+trayion \- System tray application/External app for Ion3
+
+.SH SYNOPSIS
+\fBtrayion\fR [\fI-iconsize\fR pixels] [\fI-display\fR DISPLAY]
+
+.SH DESCRIPTION
+
+\fBtrayion\fR provides a system tray area in a manner compliant with
+freedesktop.org's System Tray Protocol specification.
+
+.SH OPTIONS
+.TP
+.B -iconsize 
+Specifies trayion's icon size in pixels.
+.TP
+.B -display
+Specifies an X11 display to connect to.
+
+.SH NOTES
+In order to get trayion working correctly with Ion3, you may have to
+disable the max_hint and min_hint kludges at Ion3 configuration.
+
+.SH AUTHOR
+Paulo Matias <syscoder at gmail>
+
+.SH STANDARDS
+POSIX, freedesktop.org System Tray Protocol specification
