@@ -34,6 +34,8 @@ extern int systray_item_count;
 #define SYSTEM_TRAY_CANCEL_MESSAGE	2  /* Cancel previous balloon message */
 
 
+int scale_item_width(int preferred_width, int preferred_height, int iconsize);
+int systray_total_width();
 int init_systray();
 void cleanup_systray();
 int event_is_systray_event(XEvent *ev);

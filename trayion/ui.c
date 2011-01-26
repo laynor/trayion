@@ -11,6 +11,7 @@
  * Public License version 2 (and only version 2).
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <unistd.h>
@@ -381,7 +382,6 @@ void wmsystray_event_loop() {
 							*/
 				}
 				break;
-					
 			case Expose:
 				/*draw_ui_elements();*/
 				break;
@@ -413,10 +413,15 @@ void wmsystray_event_loop() {
 							
 				TRACE((stderr, "Window %x trying to resize to %dx%d.\n", (unsigned int)ev.xproperty.window, attrib.width, attrib.height));
 
-				if ((attrib.width != iconsize) || (attrib.height != iconsize))
+				if ((attrib.width != iconsize) || (attrib.height != iconsize)){
+					int ww;
+					ww = scale_item_width(attrib.width, attrib.height, iconsize);
 					XResizeWindow (main_disp,
-							ev.xproperty.window,
-							iconsize, iconsize);
+						       ev.xproperty.window,
+						       ww, iconsize);
+					
+					wmsystray_resize(systray_total_width(), 14);
+				}	
 
 				/*
 				cover = XCreateSimpleWindow (main_disp,

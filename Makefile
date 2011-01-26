@@ -1,7 +1,7 @@
 prefix=/usr
 bindir = ${prefix}/bin
 mandir = ${prefix}/share/man
-INSTALL = /bin/install
+INSTALL = /usr/bin/install
 INSTALLPROG = ${INSTALL} -m 0755
 INSTALLMAN = ${INSTALL} -m 0644
 

@@ -17,6 +17,7 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/Xatom.h>
 #include <xembed.h>
 
 #include "list.h"
@@ -234,12 +235,41 @@ int handle_systray_event(XEvent *ev) {
 	return 0;	
 }
 
+/*
+ * scale_item_width
+ *
+ * Returns the scaled width of the item assuming its height is iconsize,
+ * keeping the item's suggested aspect ratio
+ */
+int scale_item_width(int preferred_width, int preferred_height, int iconsize)
+{
+	return (preferred_width * iconsize) / preferred_height;
+}
 
-
+int systray_total_width()
+{
+	struct list_head *l;
+	int tw=0;
+	struct systray_item *item;
+	XWindowAttributes xwa;
+   
+	tw = 0;
+	list_for_each (l, &systray_list) {
+		item = list_entry (l, struct systray_item, systray_list);
+		if (!XGetWindowAttributes(main_disp, item->window_id, &xwa)){
+			/* FIXME: do something better than exit! */
+			fprintf(stderr, "Some error occurred!\n");
+			exit(1);
+		}
+		tw += xwa.width;
+	}
+	return tw;
+}
 /*
  * systray_item_at_coords
  *
  * Return the item at the given point.
+ * FIXME: it should check the size of each window!
  */
 struct systray_item *systray_item_at_coords (int x, int y) {
 	int item;
@@ -277,18 +307,24 @@ struct systray_item *systray_item_at_coords (int x, int y) {
 void repaint_systray() {
 	struct systray_item *item;
 	struct list_head *n;
-	int x, y;
+	int x, y, w;
 	int i = 0;
+	long l=0;
+	XSizeHints *hints;
+	XWindowAttributes wa;
 
 	TRACE((stderr, "ENTERING: repaint_systray\n"));
 
 	/*draw_ui_elements();*/
+	x = 0;
 	list_for_each (n, &systray_list) {
 		item = list_entry (n, struct systray_item, systray_list);
 
-		x = i * iconsize;
 		y = 0;
-		XMoveResizeWindow (main_disp, item->window_id, x, y, iconsize, iconsize);
+		XGetWindowAttributes(main_disp, item->window_id, &wa);
+		w = scale_item_width(wa.width, wa.height, iconsize);
+		XMoveResizeWindow (main_disp, item->window_id, x, y, w, iconsize);
+		x+=w;
 		i++;
 
 #if 0
@@ -300,7 +336,7 @@ void repaint_systray() {
 	/* Resize the area. */
 	TRACE((stderr, "RESIZE: resizing systray to %d icons.\n", systray_item_count));
 	if(systray_item_count > 0)
-		wmsystray_resize(systray_item_count * iconsize, iconsize);
+		wmsystray_resize(systray_total_width(), iconsize);
 	else
 		wmsystray_resize(iconsize, iconsize);
 	
