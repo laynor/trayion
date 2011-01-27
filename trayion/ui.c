@@ -348,8 +348,9 @@ void wmsystray_handle_signal (int signum) {
 
 void handle_enter_event()
 {
-	if (!skip_next_enter_event){
+	if (!skip_next_enter_event && !show_hidden){
 		show_hidden = 1;
+		skip_next_enter_event=1;
 		skip_next_leave_event=1;
 		repaint_systray(0);
 		printf("Entering\n");
@@ -357,9 +358,10 @@ void handle_enter_event()
 		skip_next_enter_event =0;
 	}
 }
+/* FIXME: This routine causes a bug
 void handle_leave_event()
 {
-	if (!skip_next_leave_event){
+	if (!skip_next_leave_event && show_hidden){
 		show_hidden=0;
 		repaint_systray(0);
 		printf("Leaving\n");
@@ -368,6 +370,7 @@ void handle_leave_event()
 		skip_next_enter_event = 1;
 	}
 }
+*/
 
 void check_pointer_inside_tray_kludge()
 {
@@ -376,12 +379,12 @@ void check_pointer_inside_tray_kludge()
 	static int iteration=0;
 	XWindowAttributes attrib;
 	iteration++;
-	if (iteration%100==0) {
+	if (iteration%50==0) {
 		XQueryPointer(main_disp, icon_wind, &root_return, &child_return,
 			      &pointer_root_x, &pointer_root_y,
 			      &window_x, &window_y, &pointer_mask);
 		XGetWindowAttributes(main_disp, main_wind, &attrib);
-		if(!child_return && show_hidden && !skip_next_leave_event){
+		if(!child_return && show_hidden && !skip_next_enter_event){
 			show_hidden = 0;
 			XSync(main_disp, False);
 			repaint_systray(0);
@@ -542,7 +545,7 @@ void wmsystray_event_loop() {
 				handle_enter_event();
 				break;
 			case LeaveNotify:
-				handle_leave_event();
+				/* handle_leave_event(); */
 				break;
 			case MotionNotify:
 				printf("motion\n");

@@ -337,7 +337,7 @@ void repaint_systray(int new_icon) {
 
 			y = 0;
 			XGetWindowAttributes(main_disp, item->window_id, &wa);
-			printf("%d ", window_rank(item->window_id));
+			printf("%d ", item->rank);
 			/* KLUDGE: it seems like all the newly mapped icons
 			   are suggesting an aspect ratio of 2:1, which
 			   isn't desirable.  Therefore newly mapped
