@@ -214,6 +214,8 @@ int init_ui(char *app_name, int argc, char **argv) {
 					   ButtonPressMask |
 					   ButtonReleaseMask |
 					   */
+		    			   EnterWindowMask|
+		     			   LeaveWindowMask|
 					   KeyPressMask |
 					   KeyReleaseMask);
 
@@ -225,6 +227,8 @@ int init_ui(char *app_name, int argc, char **argv) {
 					   ButtonPressMask |
 					   ButtonReleaseMask |
 					   */
+		    			   EnterWindowMask|
+		     			   LeaveWindowMask|
 					   KeyPressMask |
 					   KeyReleaseMask);
 
@@ -298,6 +302,25 @@ int point_is_in_rect (int x, int y, XRectangle *rect) {
 }
 
 
+void print_item_info(const char* fname)
+{
+	struct list_head *n;
+	struct systray_item *item;
+	XClassHint class_hint;
+	FILE *fptr;
+
+	fptr = fopen(fname, "w");
+
+	list_for_each (n, &systray_list) {
+		item = list_entry (n, struct systray_item, systray_list);
+		XGetClassHint(main_disp, item->window_id, &class_hint);
+		fprintf(fptr, "%s\n", class_hint.res_name);
+		XFree(class_hint.res_name);
+		XFree(class_hint.res_class);
+	}
+	fflush(fptr);
+	fclose(fptr);
+}
 
 /*
  * wmsystray_handle_signal
@@ -306,10 +329,13 @@ int point_is_in_rect (int x, int y, XRectangle *rect) {
  */
 void wmsystray_handle_signal (int signum) {
 	switch (signum) {
-	case SIGINT:
-	case SIGTERM:
-		loop_program = 0;
-		break;
+		case SIGUSR1:
+			print_item_info("/tmp/trayion-sorted-iconlist.txt");
+			break;
+		case SIGINT:
+		case SIGTERM:
+			loop_program = 0;
+			break;
 	}
 }
 
@@ -464,6 +490,12 @@ void wmsystray_event_loop() {
 
 			case FocusOut:
 				/* systray_focus_out(&ev); */
+				break;
+			case EnterNotify:
+				printf("Entering\n");
+				break;
+			case LeaveNotify:
+				printf("Leaving\n");
 				break;
 			}
 		}

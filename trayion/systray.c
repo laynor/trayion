@@ -21,9 +21,11 @@
 #include <xembed.h>
 
 #include "list.h"
+#include "list_sort.h"
 #include "systray.h"
 #include "trace.h"
 #include "ui.h"
+#include "sorted_classes.h"
 
 
 static Atom systray_atom = None;
@@ -31,6 +33,7 @@ static Atom opcode_atom = None;
 static Atom message_atom = None;
 struct list_head systray_list;
 struct list_head *current_item = &systray_list;
+
 int systray_item_count = 0, systray_current_item_no = 0;
 
 int handle_dock_request (Window embed_wind);
@@ -318,9 +321,7 @@ void repaint_systray(int new_icon) {
 	struct list_head *n;
 	int x, y, w;
 	int i = 0;
-	long l=0;
 	int length;
-	XSizeHints *hints;
 	XWindowAttributes wa;
 	TRACE((stderr, "ENTERING: repaint_systray\n"));
 
@@ -333,12 +334,15 @@ void repaint_systray(int new_icon) {
 
 		y = 0;
 		XGetWindowAttributes(main_disp, item->window_id, &wa);
-		/* KLUDGE: it seems like all the newly mapped icons are suggesting an aspect ratio of 2:1,
-		 *         which isn't desirable.
-		 *         Therefore newly mapped icons are resized to iconsize x iconsize. 
-		 *         Resize requests are handled correctly, and the width is kept once is set
+		printf("%d ", window_rank(item->window_id));
+		/* KLUDGE: it seems like all the newly mapped icons
+		          are suggesting an aspect ratio of 2:1, which
+		          isn't desirable.  Therefore newly mapped
+		          icons are resized to iconsize x iconsize.
+		          Resize requests are handled correctly, and
+		          the width is kept once is set
 		 */
-		w =  (i+1 == length) && new_icon ? iconsize :  scale_item_width(wa.width, wa.height, iconsize);
+		w =  (new_icon == item->window_id) ? iconsize :  scale_item_width(wa.width, wa.height, iconsize);
 		XMoveResizeWindow (main_disp, item->window_id, x, y, w, iconsize);
 		TRACE((stderr, "(ID:0x%x,W:%d) ", item->window_id, w));
 		x+=w;
@@ -349,6 +353,7 @@ void repaint_systray(int new_icon) {
 			break;
 #endif
 	}
+	printf("\n");
 	TRACE((stderr, "\n"));
 	
 	/* Resize the area. */
@@ -382,7 +387,13 @@ void print_geometry (Window embed_wind) {
 			width, height, x, y, border_width, depth));
 }
 
-
+int compare_items(struct list_head *a, struct list_head *b)
+{
+	struct systray_item *it1, *it2;
+	it1 = list_entry(a, struct systray_item, systray_list);
+	it2 = list_entry(b, struct systray_item, systray_list);
+	return it1->rank - it2->rank;
+}
 
 /*
  * handle_dock_request
@@ -423,6 +434,7 @@ int handle_dock_request (Window embed_wind) {
 	INIT_LIST_HEAD (& item->systray_list);
 	memcpy (&item->info, &info, sizeof(info));
 	item->window_id = embed_wind;
+	item->rank = window_rank(item->window_id);
 	list_add_tail (&item->systray_list, &systray_list);
 
 	/*SelectInput was here*/
@@ -467,8 +479,8 @@ int handle_dock_request (Window embed_wind) {
 	status = xembed_modality_off (main_disp, embed_wind);
 	XSync (main_disp, False);
 	*/
-
-	repaint_systray(1);
+	list_sort(&systray_list, compare_items);
+	repaint_systray(item->window_id);
 	TRACE((stderr, "LEAVING: handle_dock_request\n"));
 	return 0;
 }

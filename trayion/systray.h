@@ -17,9 +17,11 @@
 #include <xembed.h>
 #include "list.h"
 
+
 struct systray_item {
 	Window window_id;
 	struct xembed_info info;
+	int rank;
 	struct list_head systray_list;
 };
 

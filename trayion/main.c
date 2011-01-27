@@ -21,6 +21,7 @@
 
 #include "ui.h"
 #include "systray.h"
+#include "sorted_classes.h"
 #include "version.h"
 
 
@@ -31,8 +32,12 @@ static int error_handler(Display *d, XErrorEvent *e) {
 	return 0;
 }
 
+
 int main(int argc, char **argv) {
 	struct sigaction act, oldact;
+
+	load_sorted_classes_list("/tmp/trayion-sorted-iconlist.txt");
+	print_sorted_classes_list();
 
 	XSetErrorHandler(error_handler);
 
@@ -41,6 +46,7 @@ int main(int argc, char **argv) {
 	act.sa_flags = 0;
 	sigaction (SIGTERM, &act, &oldact);
 	sigaction (SIGINT, &act, &oldact);
+	sigaction (SIGUSR1, &act, &oldact);
 
 	if (init_ui ("wmsystray", argc, argv) != 0) {
 		printf ("Could not connect to X server!\n");
