@@ -298,32 +298,49 @@ struct systray_item *systray_item_at_coords (int x, int y) {
 }
 
 
+int systray_list_length()
+{
+	struct list_head *n;
+	int length = 0;
+	list_for_each (n, &systray_list) {
+		length++;
+	}
+	return length;
+}
 
 /*
  * repaint_systray
  *
  * Repaint our systray area.
  */
-void repaint_systray() {
+void repaint_systray(int new_icon) {
 	struct systray_item *item;
 	struct list_head *n;
 	int x, y, w;
 	int i = 0;
 	long l=0;
+	int length;
 	XSizeHints *hints;
 	XWindowAttributes wa;
-
 	TRACE((stderr, "ENTERING: repaint_systray\n"));
 
 	/*draw_ui_elements();*/
 	x = 0;
+	length = systray_list_length();
 	list_for_each (n, &systray_list) {
+		
 		item = list_entry (n, struct systray_item, systray_list);
 
 		y = 0;
 		XGetWindowAttributes(main_disp, item->window_id, &wa);
-		w = scale_item_width(wa.width, wa.height, iconsize);
+		/* KLUDGE: it seems like all the newly mapped icons are suggesting an aspect ratio of 2:1,
+		 *         which isn't desirable.
+		 *         Therefore newly mapped icons are resized to iconsize x iconsize. 
+		 *         Resize requests are handled correctly, and the width is kept once is set
+		 */
+		w =  (i+1 == length) && new_icon ? iconsize :  scale_item_width(wa.width, wa.height, iconsize);
 		XMoveResizeWindow (main_disp, item->window_id, x, y, w, iconsize);
+		TRACE((stderr, "(ID:0x%x,W:%d) ", item->window_id, w));
 		x+=w;
 		i++;
 
@@ -332,6 +349,7 @@ void repaint_systray() {
 			break;
 #endif
 	}
+	TRACE((stderr, "\n"));
 	
 	/* Resize the area. */
 	TRACE((stderr, "RESIZE: resizing systray to %d icons.\n", systray_item_count));
@@ -450,7 +468,7 @@ int handle_dock_request (Window embed_wind) {
 	XSync (main_disp, False);
 	*/
 
-	repaint_systray();
+	repaint_systray(1);
 	TRACE((stderr, "LEAVING: handle_dock_request\n"));
 	return 0;
 }

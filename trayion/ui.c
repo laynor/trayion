@@ -447,7 +447,7 @@ void wmsystray_event_loop() {
 						(unsigned int)item->window_id));
 					systray_item_count--;
 					list_del (&item->systray_list);
-					repaint_systray();
+					repaint_systray(0);
 				}
 
 				break;
