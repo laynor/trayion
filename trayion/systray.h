@@ -27,6 +27,7 @@ struct systray_item {
 
 extern struct list_head systray_list;
 extern int systray_item_count;
+extern int place_hidden_items_on_the_left;
 
 /*
  * System tray message opcodes. (From the freedesktop.org specification.)

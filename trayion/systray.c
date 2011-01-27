@@ -26,6 +26,7 @@
 #include "trace.h"
 #include "ui.h"
 #include "sorted_classes.h"
+#include "hidden_list.h"
 
 
 static Atom systray_atom = None;
@@ -35,6 +36,7 @@ struct list_head systray_list;
 struct list_head *current_item = &systray_list;
 
 int systray_item_count = 0, systray_current_item_no = 0;
+int place_hidden_items_on_the_left=1;
 
 int handle_dock_request (Window embed_wind);
 
@@ -264,7 +266,8 @@ int systray_total_width()
 			fprintf(stderr, "Some error occurred!\n");
 			exit(1);
 		}
-		tw += xwa.width;
+		if (show_hidden || !is_hidden(item->window_id))
+			tw += xwa.width;
 	}
 	return tw;
 }
@@ -332,21 +335,25 @@ void repaint_systray(int new_icon) {
 		
 		item = list_entry (n, struct systray_item, systray_list);
 
-		y = 0;
-		XGetWindowAttributes(main_disp, item->window_id, &wa);
-		printf("%d ", window_rank(item->window_id));
-		/* KLUDGE: it seems like all the newly mapped icons
-		          are suggesting an aspect ratio of 2:1, which
-		          isn't desirable.  Therefore newly mapped
-		          icons are resized to iconsize x iconsize.
-		          Resize requests are handled correctly, and
-		          the width is kept once is set
-		 */
-		w =  (new_icon == item->window_id) ? iconsize :  scale_item_width(wa.width, wa.height, iconsize);
-		XMoveResizeWindow (main_disp, item->window_id, x, y, w, iconsize);
-		TRACE((stderr, "(ID:0x%x,W:%d) ", item->window_id, w));
-		x+=w;
-		i++;
+			y = 0;
+			XGetWindowAttributes(main_disp, item->window_id, &wa);
+			printf("%d ", window_rank(item->window_id));
+			/* KLUDGE: it seems like all the newly mapped icons
+			   are suggesting an aspect ratio of 2:1, which
+			   isn't desirable.  Therefore newly mapped
+			   icons are resized to iconsize x iconsize.
+			   Resize requests are handled correctly, and
+			   the width is kept once is set
+			*/
+			w =  (new_icon == item->window_id) ? iconsize :  scale_item_width(wa.width, wa.height, iconsize);
+		if (show_hidden || !is_hidden(item->window_id)){
+			XMoveResizeWindow (main_disp, item->window_id, x, y, w, iconsize);
+			TRACE((stderr, "(ID:0x%x,W:%d) ", item->window_id, w));
+			x+=w;
+			i++;
+		}else if (new_icon) {
+			XMoveResizeWindow (main_disp, item->window_id, -w, y, w, iconsize);
+		}
 
 #if 0
 		if (i == 4)
@@ -435,6 +442,9 @@ int handle_dock_request (Window embed_wind) {
 	memcpy (&item->info, &info, sizeof(info));
 	item->window_id = embed_wind;
 	item->rank = window_rank(item->window_id);
+	if (place_hidden_items_on_the_left && is_hidden(item->window_id)){
+		item->rank = - item->rank;
+	}
 	list_add_tail (&item->systray_list, &systray_list);
 
 	/*SelectInput was here*/

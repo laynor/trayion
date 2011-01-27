@@ -2,10 +2,6 @@
 #define SORTED_CLASSES_H
 
 #include "list.h"
-struct sorted_classes_item {
-   char *class;
-   struct list_head sorted_classes_list;
-};
 
 extern struct list_head sorted_classes_list;
 

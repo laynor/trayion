@@ -23,6 +23,7 @@
 #include "systray.h"
 #include "sorted_classes.h"
 #include "version.h"
+#include "hidden_list.h"
 
 
 void usage();
@@ -37,6 +38,7 @@ int main(int argc, char **argv) {
 	struct sigaction act, oldact;
 
 	load_sorted_classes_list("/tmp/trayion-sorted-iconlist.txt");
+	load_hidden_list("/tmp/trayion-hidden-iconlist.txt");
 	print_sorted_classes_list();
 
 	XSetErrorHandler(error_handler);
@@ -107,6 +109,10 @@ void parse_cmd_line (int argc, char **argv) {
 		{
 			usage();
 			exit(0);
+		} else if (strcmp(argv[i], "-hidden-items-left")) {
+			place_hidden_items_on_the_left = 1;
+		} else if (strcmp(argv[i], "-keep-hidden-items-position")) {
+			place_hidden_items_on_the_left = 0;
 		}
 #if 0
 		else if (strcmp(argv[i], "--nowm") == 0) {

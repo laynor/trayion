@@ -24,6 +24,7 @@
 #include "trace.h"
 #include "systray.h"
 #include "ui.h"
+#include "hidden_list.h"
 
 
 Display *main_disp;
@@ -38,6 +39,10 @@ char *bg_data;
 int iconsize = 14;
 int loop_program = 1;
 /*static GC main_gc;*/
+
+/* kludge! */
+int skip_next_leave_event=0;
+int skip_next_enter_event=0;
 
 
 #if 0
@@ -216,6 +221,7 @@ int init_ui(char *app_name, int argc, char **argv) {
 					   */
 		    			   EnterWindowMask|
 		     			   LeaveWindowMask|
+		                           PointerMotionMask|
 					   KeyPressMask |
 					   KeyReleaseMask);
 
@@ -229,6 +235,7 @@ int init_ui(char *app_name, int argc, char **argv) {
 					   */
 		    			   EnterWindowMask|
 		     			   LeaveWindowMask|
+		                           PointerMotionMask|
 					   KeyPressMask |
 					   KeyReleaseMask);
 
@@ -339,8 +346,48 @@ void wmsystray_handle_signal (int signum) {
 	}
 }
 
+void handle_enter_event()
+{
+	if (!skip_next_enter_event){
+		show_hidden = 1;
+		skip_next_leave_event=1;
+		repaint_systray(0);
+		printf("Entering\n");
+	} else {
+		skip_next_enter_event =0;
+	}
+}
+void handle_leave_event()
+{
+	if (!skip_next_leave_event){
+		show_hidden=0;
+		repaint_systray(0);
+		printf("Leaving\n");
+	} else {
+		skip_next_leave_event = 0;
+		skip_next_enter_event = 1;
+	}
+}
 
-
+void check_pointer_inside_tray_kludge()
+{
+	Window root_return, child_return;
+	int pointer_root_x, pointer_root_y, window_x, window_y, pointer_mask;
+	static int iteration=0;
+	XWindowAttributes attrib;
+	iteration++;
+	if (iteration%100==0) {
+		XQueryPointer(main_disp, icon_wind, &root_return, &child_return,
+			      &pointer_root_x, &pointer_root_y,
+			      &window_x, &window_y, &pointer_mask);
+		XGetWindowAttributes(main_disp, main_wind, &attrib);
+		if(!child_return && show_hidden && !skip_next_leave_event){
+			show_hidden = 0;
+			XSync(main_disp, False);
+			repaint_systray(0);
+		}
+	}
+}
 /*
  * wmsystray_event_loop
  *
@@ -492,14 +539,17 @@ void wmsystray_event_loop() {
 				/* systray_focus_out(&ev); */
 				break;
 			case EnterNotify:
-				printf("Entering\n");
+				handle_enter_event();
 				break;
 			case LeaveNotify:
-				printf("Leaving\n");
+				handle_leave_event();
+				break;
+			case MotionNotify:
+				printf("motion\n");
 				break;
 			}
 		}
-
 		usleep(100000L);
+		check_pointer_inside_tray_kludge();
 	}
 }
