@@ -33,12 +33,37 @@ static int error_handler(Display *d, XErrorEvent *e) {
 	return 0;
 }
 
+char* home_relative_path(char *rpath)
+{
+	char *homedir;
+	char *apath;
+	homedir = getenv("HOME");
+	apath = malloc((strlen(rpath) + strlen(homedir) + 2) * sizeof(char));
+	apath[0]='\0';
+	strcpy(apath, homedir);
+	strcat(apath, "/");
+	strcat(apath, rpath);
+	return apath;
+}
+
+void load_sorting_config()
+{
+	char *path = home_relative_path(".trayion/trayion-sorted-iconlist.txt");
+	load_sorted_classes_list(path);
+	free(path);
+}
+void load_hiding_config()
+{
+	char *path = home_relative_path(".trayion/trayion-hidden-iconlist.txt");
+	load_hidden_list(path);
+	free(path);
+}
 
 int main(int argc, char **argv) {
 	struct sigaction act, oldact;
 
-	load_sorted_classes_list("/tmp/trayion-sorted-iconlist.txt");
-	load_hidden_list("/tmp/trayion-hidden-iconlist.txt");
+	load_sorting_config();
+	load_hiding_config();
 	print_sorted_classes_list();
 
 	XSetErrorHandler(error_handler);
@@ -80,6 +105,8 @@ void usage() {
 	printf ("Usage: %s [OPTION] ... \n\n", PACKAGE_TARNAME);
 	printf ("\t-display <display>\t\t\tX display to connect to\n");
 	printf ("\t-iconsize <pixels>\t\t\ticon size in pixels\n");
+	printf ("\t-hidden-items-left\t\t\tdisplay hidden icons on the left side of the tray (default)\n");
+	printf ("\t-keep-hidden-items-position\t\t\tkeep the hidden icons position as specified by the sorting config file\n");
 	printf ("\n\nReport bugs to: %s\n", PACKAGE_BUGREPORT);
 }
 
