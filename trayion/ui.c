@@ -421,6 +421,7 @@ void wmsystray_event_loop() {
 						       ww, iconsize);
 					
 					wmsystray_resize(systray_total_width(), 14);
+					repaint_systray(0);
 				}	
 
 				/*
