@@ -348,21 +348,21 @@ void wmsystray_handle_signal (int signum) {
 
 void handle_enter_event()
 {
-	if (!skip_next_enter_event && !show_hidden){
+	if (!skip_next_enter_event){
 		show_hidden = 1;
-		skip_next_enter_event=1;
-		skip_next_leave_event=1;
+		skip_next_leave_event = 1;
+		printf("repaint unhide ");
 		repaint_systray(0);
 		printf("Entering\n");
 	} else {
-		skip_next_enter_event =0;
+		skip_next_enter_event = 0;
 	}
 }
-/* FIXME: This routine causes a bug
 void handle_leave_event()
 {
-	if (!skip_next_leave_event && show_hidden){
+	if (!skip_next_leave_event){
 		show_hidden=0;
+		printf("repaint hide ");
 		repaint_systray(0);
 		printf("Leaving\n");
 	} else {
@@ -370,7 +370,6 @@ void handle_leave_event()
 		skip_next_enter_event = 1;
 	}
 }
-*/
 
 void check_pointer_inside_tray_kludge()
 {
@@ -379,14 +378,15 @@ void check_pointer_inside_tray_kludge()
 	static int iteration=0;
 	XWindowAttributes attrib;
 	iteration++;
-	if (iteration%50==0) {
+	if (iteration%100==0) {
 		XQueryPointer(main_disp, icon_wind, &root_return, &child_return,
 			      &pointer_root_x, &pointer_root_y,
 			      &window_x, &window_y, &pointer_mask);
 		XGetWindowAttributes(main_disp, main_wind, &attrib);
-		if(!child_return && show_hidden && !skip_next_enter_event){
+		if(!child_return && show_hidden && !skip_next_leave_event){
 			show_hidden = 0;
 			XSync(main_disp, False);
+			printf("repaint mouse out ");
 			repaint_systray(0);
 		}
 	}
@@ -489,7 +489,7 @@ void wmsystray_event_loop() {
 							
 				TRACE((stderr, "Window %x trying to resize to %dx%d.\n", (unsigned int)ev.xproperty.window, attrib.width, attrib.height));
 
-				if ((attrib.width != iconsize) || (attrib.height != iconsize)){
+				if ((attrib.height != iconsize)){
 					int ww;
 					ww = scale_item_width(attrib.width, attrib.height, iconsize);
 					XResizeWindow (main_disp,
@@ -497,6 +497,7 @@ void wmsystray_event_loop() {
 						       ww, iconsize);
 					
 					wmsystray_resize(systray_total_width(), 14);
+					printf("repaint resize ");
 					repaint_systray(0);
 				}	
 
@@ -524,6 +525,7 @@ void wmsystray_event_loop() {
 						(unsigned int)item->window_id));
 					systray_item_count--;
 					list_del (&item->systray_list);
+					printf("repaint destroy ");
 					repaint_systray(0);
 				}
 
@@ -545,7 +547,7 @@ void wmsystray_event_loop() {
 				handle_enter_event();
 				break;
 			case LeaveNotify:
-				/* handle_leave_event(); */
+				handle_leave_event();
 				break;
 			case MotionNotify:
 				printf("motion\n");

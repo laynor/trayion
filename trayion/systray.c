@@ -416,7 +416,6 @@ int handle_dock_request (Window embed_wind) {
 	TRACE((stderr, "ENTERING: handle_dock_request\n"));
 	new_x = new_y = 0;
 	version = XEMBED_VERSION;
-
 #if 0
 	if (systray_item_count == 4) {
 		XReparentWindow (main_disp, embed_wind,
@@ -490,6 +489,7 @@ int handle_dock_request (Window embed_wind) {
 	XSync (main_disp, False);
 	*/
 	list_sort(&systray_list, compare_items);
+	printf("repaint dock ");
 	repaint_systray(item->window_id);
 	TRACE((stderr, "LEAVING: handle_dock_request\n"));
 	return 0;
