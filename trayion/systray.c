@@ -337,7 +337,6 @@ void repaint_systray(int new_icon) {
 
 			y = 0;
 			XGetWindowAttributes(main_disp, item->window_id, &wa);
-			printf("%d ", item->rank);
 			/* KLUDGE: it seems like all the newly mapped icons
 			   are suggesting an aspect ratio of 2:1, which
 			   isn't desirable.  Therefore newly mapped
@@ -360,7 +359,6 @@ void repaint_systray(int new_icon) {
 			break;
 #endif
 	}
-	printf("\n");
 	TRACE((stderr, "\n"));
 	
 	/* Resize the area. */
@@ -489,7 +487,6 @@ int handle_dock_request (Window embed_wind) {
 	XSync (main_disp, False);
 	*/
 	list_sort(&systray_list, compare_items);
-	printf("repaint dock ");
 	repaint_systray(item->window_id);
 	TRACE((stderr, "LEAVING: handle_dock_request\n"));
 	return 0;

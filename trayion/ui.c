@@ -351,9 +351,7 @@ void handle_enter_event()
 	if (!skip_next_enter_event){
 		show_hidden = 1;
 		skip_next_leave_event = 1;
-		printf("repaint unhide ");
 		repaint_systray(0);
-		printf("Entering\n");
 	} else {
 		skip_next_enter_event = 0;
 	}
@@ -362,9 +360,7 @@ void handle_leave_event()
 {
 	if (!skip_next_leave_event){
 		show_hidden=0;
-		printf("repaint hide ");
 		repaint_systray(0);
-		printf("Leaving\n");
 	} else {
 		skip_next_leave_event = 0;
 		skip_next_enter_event = 1;
@@ -386,7 +382,6 @@ void check_pointer_inside_tray_kludge()
 		if(!child_return && show_hidden && !skip_next_leave_event){
 			show_hidden = 0;
 			XSync(main_disp, False);
-			printf("repaint mouse out ");
 			repaint_systray(0);
 		}
 	}
@@ -497,7 +492,6 @@ void wmsystray_event_loop() {
 						       ww, iconsize);
 					
 					wmsystray_resize(systray_total_width(), 14);
-					printf("repaint resize ");
 					repaint_systray(0);
 				}	
 
@@ -525,7 +519,6 @@ void wmsystray_event_loop() {
 						(unsigned int)item->window_id));
 					systray_item_count--;
 					list_del (&item->systray_list);
-					printf("repaint destroy ");
 					repaint_systray(0);
 				}
 
@@ -550,7 +543,6 @@ void wmsystray_event_loop() {
 				handle_leave_event();
 				break;
 			case MotionNotify:
-				printf("motion\n");
 				break;
 			}
 		}
