@@ -33,6 +33,7 @@ void load_string_list(char *fname, struct list_head *string_list)
 
 	if ((fptr = fopen(fname, "r"))) {
 		while (fgets(s, 256*sizeof(char), fptr)){
+			if (s[0] == '#') continue;
 			item = malloc(sizeof(struct string_item));
 			item->info = malloc((1+strlen(s))*sizeof(char));
 			strcpy(item->info, s);

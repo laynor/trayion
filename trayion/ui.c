@@ -321,10 +321,22 @@ void print_item_info(const char* fname)
 
 	list_for_each (n, &systray_list) {
 		item = list_entry (n, struct systray_item, systray_list);
-		XGetClassHint(main_disp, item->window_id, &class_hint);
-		fprintf(fptr, "%s\n", class_hint.res_name);
-		XFree(class_hint.res_name);
-		XFree(class_hint.res_class);
+		if (item->rank >= 0){
+			XGetClassHint(main_disp, item->window_id, &class_hint);
+			fprintf(fptr, "%s\n", class_hint.res_name);
+			XFree(class_hint.res_name);
+			XFree(class_hint.res_class);
+		}
+	}
+	fprintf(fptr, "# Hidden icons must be listed in reverse order to keep the ordering\n");
+	list_for_each_prev (n, &systray_list) {
+		item = list_entry (n, struct systray_item, systray_list);
+		if (item->rank < 0){
+			XGetClassHint(main_disp, item->window_id, &class_hint);
+			fprintf(fptr, "%s\n", class_hint.res_name);
+			XFree(class_hint.res_name);
+			XFree(class_hint.res_class);
+		}
 	}
 	fflush(fptr);
 	fclose(fptr);
