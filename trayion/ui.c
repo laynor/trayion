@@ -25,6 +25,7 @@
 #include "systray.h"
 #include "ui.h"
 #include "hidden_list.h"
+#include "configuration_files.h"
 
 
 Display *main_disp;
@@ -329,6 +330,7 @@ void print_item_info(const char* fname)
 	fclose(fptr);
 }
 
+
 /*
  * wmsystray_handle_signal
  *
@@ -337,7 +339,12 @@ void print_item_info(const char* fname)
 void wmsystray_handle_signal (int signum) {
 	switch (signum) {
 		case SIGUSR1:
-			print_item_info("/tmp/trayion-sorted-iconlist.txt");
+			print_item_info("/tmp/trayion-icon-list.txt");
+			break;
+		case SIGUSR2:
+			reload_config_files();
+			repaint_systray(0);
+			printf("reloading config files.\n");
 			break;
 		case SIGINT:
 		case SIGTERM:
@@ -370,12 +377,13 @@ void handle_leave_event()
 void check_pointer_inside_tray_kludge()
 {
 	Window root_return, child_return;
-	int pointer_root_x, pointer_root_y, window_x, window_y, pointer_mask;
+	int pointer_root_x, pointer_root_y, window_x, window_y;
+	unsigned int pointer_mask;
 	static int iteration=0;
 	XWindowAttributes attrib;
 	iteration++;
 	if (iteration%100==0) {
-		XQueryPointer(main_disp, icon_wind, &root_return, &child_return,
+		XQueryPointer(main_disp, icon_wind, &root_return, &child_return, 
 			      &pointer_root_x, &pointer_root_y,
 			      &window_x, &window_y, &pointer_mask);
 		XGetWindowAttributes(main_disp, main_wind, &attrib);

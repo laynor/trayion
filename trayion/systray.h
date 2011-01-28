@@ -14,6 +14,7 @@
 #ifndef WMSYSTRAY_SYSTRAY_H
 #define WMSYSTRAY_SYSTRAY_H
 
+#include <X11/Xlib.h>
 #include <xembed.h>
 #include "list.h"
 
@@ -46,5 +47,7 @@ int handle_systray_event(XEvent *ev);
 void repaint_systray(int new_icon);
 struct systray_item *find_systray_item(Window id);
 int systray_property_update(struct systray_item *item);
+void recalc_window_ranks();
+void sort_systray_list();
 
 #endif

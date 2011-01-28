@@ -21,9 +21,8 @@
 
 #include "ui.h"
 #include "systray.h"
-#include "sorted_classes.h"
 #include "version.h"
-#include "hidden_list.h"
+#include "configuration_files.h"
 
 
 void usage();
@@ -33,38 +32,10 @@ static int error_handler(Display *d, XErrorEvent *e) {
 	return 0;
 }
 
-char* home_relative_path(char *rpath)
-{
-	char *homedir;
-	char *apath;
-	homedir = getenv("HOME");
-	apath = malloc((strlen(rpath) + strlen(homedir) + 2) * sizeof(char));
-	apath[0]='\0';
-	strcpy(apath, homedir);
-	strcat(apath, "/");
-	strcat(apath, rpath);
-	return apath;
-}
-
-void load_sorting_config()
-{
-	char *path = home_relative_path(".trayion/trayion-sorted-iconlist.txt");
-	load_sorted_classes_list(path);
-	free(path);
-}
-void load_hiding_config()
-{
-	char *path = home_relative_path(".trayion/trayion-hidden-iconlist.txt");
-	load_hidden_list(path);
-	free(path);
-}
-
 int main(int argc, char **argv) {
 	struct sigaction act, oldact;
 
-	load_sorting_config();
-	load_hiding_config();
-	print_sorted_classes_list();
+	reload_config_files();
 
 	XSetErrorHandler(error_handler);
 
@@ -74,6 +45,7 @@ int main(int argc, char **argv) {
 	sigaction (SIGTERM, &act, &oldact);
 	sigaction (SIGINT, &act, &oldact);
 	sigaction (SIGUSR1, &act, &oldact);
+	sigaction (SIGUSR2, &act, &oldact);
 
 	if (init_ui ("wmsystray", argc, argv) != 0) {
 		printf ("Could not connect to X server!\n");

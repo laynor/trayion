@@ -75,24 +75,26 @@ to:
 Now you can control the icon size using the trayion '-iconsize' command
 line argument. The default size is 14 pixels.
 
-Icon Sorting
+Config Files
 ============
-You can define icon sorting creating the file  
-  ~/.trayion/trayion-sorted-iconlist.txt
-issuing the command 
-  $ kill -s USR1 <trayion process pid>
-a file containing the current ordering will be created in 
-  /tmp/trayion-sorted-iconlist.txt
-Just reorder the lines to your liking and copy that file to 
-  ~/.trayion/
-and restart trayion.
+Icon Sorting: ~/.trayion/trayion-sorted-iconlist.txt
+Icon Hiding:  ~/.trayion/trayion-hidden-iconlist.txt
 
-Icon Hiding
-===========
-Follow the same process for the Icon Sorting,
-but move the file as 
-  ~/.trayion/trayion-hidden-iconlist.txt
-Specify all the icons you want it to hide.
+An initial version of the file can be created issuing the command
+  $ kill -s USR1 <trayion process pid>
+in a shell. This will create a file 
+ /tmp/trayion-icon-list.txt
+You can copy the contents of the file in 
+~/.trayion/trayion-sorted-iconlist.txt
+and 
+~/.trayion/trayion-hidden-iconlist.txt 
+
+and then edit them, changing the ordering of the icons in the first
+one, selecting which icons you want to be hidden in the second one.
+
+The configuration files can be reloaded on the fly issuing the command 
+  $ kill -s USR2 <trayion process pid>
+in a shell. 
 
 License/Copyright Information
 ==============================

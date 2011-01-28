@@ -303,6 +303,18 @@ struct systray_item *systray_item_at_coords (int x, int y) {
 	return ret;
 }
 
+void recalc_window_ranks()
+{
+	struct list_head *l;
+	struct systray_item *item;
+   
+	list_for_each (l, &systray_list) {
+		item = list_entry (l, struct systray_item, systray_list);
+		item->rank = window_rank(item->window_id);
+		if (is_hidden(item->window_id))
+			item->rank = - item->rank;
+	}
+}
 
 int systray_list_length()
 {
@@ -399,7 +411,10 @@ int compare_items(struct list_head *a, struct list_head *b)
 	it2 = list_entry(b, struct systray_item, systray_list);
 	return it1->rank - it2->rank;
 }
-
+void sort_systray_list()
+{
+	list_sort(&systray_list, compare_items);
+}
 /*
  * handle_dock_request
  *
@@ -486,7 +501,7 @@ int handle_dock_request (Window embed_wind) {
 	status = xembed_modality_off (main_disp, embed_wind);
 	XSync (main_disp, False);
 	*/
-	list_sort(&systray_list, compare_items);
+	sort_systray_list();
 	repaint_systray(item->window_id);
 	TRACE((stderr, "LEAVING: handle_dock_request\n"));
 	return 0;

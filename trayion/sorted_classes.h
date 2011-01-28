@@ -1,6 +1,7 @@
 #ifndef SORTED_CLASSES_H
 #define SORTED_CLASSES_H
 
+#include <X11/Xlib.h>
 #include "list.h"
 
 extern struct list_head sorted_classes_list;
