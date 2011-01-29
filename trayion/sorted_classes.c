@@ -24,18 +24,21 @@ void print_sorted_classes_list()
 
 int window_rank(Window window)
 {
-	XClassHint class_hint;
+	XClassHint *class_hint;
 	struct list_head *n;
 	struct string_item *item;
-	XGetClassHint(main_disp, window, &class_hint);
+	class_hint = XAllocClassHint();
+	XGetClassHint(main_disp, window, class_hint);
 	int i = 0;
 	list_for_each(n, &sorted_classes_list) {
 		item = list_entry(n, struct string_item, string_list);
-		if(!strcmp(item->info, class_hint.res_name)){
+		if(class_hint->res_name && !strcmp(item->info, class_hint->res_name)){
+			XFree(class_hint);
 			return i;
 			break;
 		}
 		i++;
 	}
+	XFree(class_hint);
 	return INT_MAX;
 }
