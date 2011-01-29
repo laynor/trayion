@@ -361,8 +361,11 @@ void repaint_systray(int new_icon) {
 			XMoveResizeWindow (main_disp, item->window_id, x, y, w, iconsize);
 			x+=w;
 			i++;
-		}else if (new_icon) {
-			XMoveResizeWindow (main_disp, item->window_id, -w, y, w, iconsize);
+		}else {
+			XMoveWindow(main_disp, item->window_id, -w, y);
+			if (new_icon) {
+				XResizeWindow (main_disp, item->window_id, w, iconsize);
+			}
 		}
 
 #if 0
