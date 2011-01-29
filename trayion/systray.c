@@ -357,15 +357,14 @@ void repaint_systray(int new_icon) {
 		   the width is kept once is set
 		*/
 		w =  (new_icon == item->window_id) ? iconsize :  scale_item_width(wa.width, wa.height, iconsize);
+		XResizeWindow(main_disp, item->window_id, w, iconsize);
 		if (show_hidden || !is_hidden(item->window_id)){
-			XMoveResizeWindow (main_disp, item->window_id, x, y, w, iconsize);
+			XMoveWindow (main_disp, item->window_id, x, y);
 			x+=w;
 			i++;
 		}else {
+			/* Move window outside the clipping area */
 			XMoveWindow(main_disp, item->window_id, -w, y);
-			if (new_icon) {
-				XResizeWindow (main_disp, item->window_id, w, iconsize);
-			}
 		}
 
 #if 0
