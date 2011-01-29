@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
+#include <unistd.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -30,6 +31,15 @@ void parse_cmd_line (int argc, char **argv);
 
 static int error_handler(Display *d, XErrorEvent *e) {
 	return 0;
+}
+
+void save_pid_file()
+{
+	FILE *fptr;
+
+	fptr = fopen(home_relative_path(".trayion/trayion.pid"), "w");
+	fprintf(fptr, "%d", getpid());
+	fclose(fptr);
 }
 
 int main(int argc, char **argv) {
@@ -58,6 +68,7 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
+	save_pid_file();
 	wmsystray_event_loop();
 
 	cleanup_systray();

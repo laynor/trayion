@@ -17,4 +17,6 @@ install: trayion/trayion
 	mkdir -p ${bindir}
 	mkdir -p ${mandir}/man1
 	${INSTALLPROG} trayion/trayion ${bindir}/trayion
+	${INSTALLPROG} trayion-dump.sh ${bindir}/trayion-dump
+	${INSTALLPROG} trayion-reload.sh ${bindir}/trayion-reload
 	${INSTALLMAN} doc/trayion.1 ${mandir}/man1/trayion.1
