@@ -315,25 +315,28 @@ void print_item_info(const char* fname)
 	struct list_head *n;
 	struct systray_item *item;
 	XClassHint *class_hint;
-	FILE *fptr;
+	FILE *fptr, *fptri;
 	int skip_free=1;
 
 	class_hint = XAllocClassHint();
 	fptr = fopen(fname, "w");
-
+	fptri = fopen("/tmp/tray-icon-infos.txt", "w");
 	list_for_each (n, &systray_list) {
 		item = list_entry (n, struct systray_item, systray_list);
 		if (item->rank >= 0){
+			fprintf(fptri, "ID = 0x%x ", item->window_id);
 			if(!skip_free){
 				XFree(class_hint->res_class); 
 				XFree(class_hint->res_name); 
 			}
 			if (XGetClassHint(main_disp, item->window_id, class_hint)){
 				fprintf(fptr, "%s\n", class_hint->res_class);
+				fprintf(fptri, "class: '%s', name: '%s'", class_hint->res_class, class_hint->res_name);
 				skip_free = 0;
 			} else {
 				skip_free = 1;
 			}
+			fprintf(fptri, "\n");
 		}
 	}
 	fprintf(fptr, "# Hidden icons must be listed in reverse order to keep the ordering\n");
@@ -345,12 +348,15 @@ void print_item_info(const char* fname)
 				XFree(class_hint->res_name); 
 			}
 			XGetClassHint(main_disp, item->window_id, class_hint);
+			fprintf(fptri, "ID = 0x%x class: '%s', name: '%s'\n", item->window_id, class_hint->res_class, class_hint->res_name);
 			skip_free=0;
 			fprintf(fptr, "%s\n", class_hint->res_class);
 		}
 	}
 	fflush(fptr);
 	fclose(fptr);
+	fflush(fptri);
+	fclose(fptri);
 	XFree(class_hint);
 }
 
