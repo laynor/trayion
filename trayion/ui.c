@@ -316,6 +316,7 @@ void print_item_info(const char* fname)
 	struct systray_item *item;
 	XClassHint *class_hint;
 	FILE *fptr;
+	int skip_free=1;
 
 	class_hint = XAllocClassHint();
 	fptr = fopen(fname, "w");
@@ -323,25 +324,34 @@ void print_item_info(const char* fname)
 	list_for_each (n, &systray_list) {
 		item = list_entry (n, struct systray_item, systray_list);
 		if (item->rank >= 0){
-			XGetClassHint(main_disp, item->window_id, class_hint);
-			fprintf(fptr, "%s\n", class_hint->res_name);
-			XFree(class_hint->res_name);
-			XFree(class_hint->res_class);
+			if(!skip_free){
+				XFree(class_hint->res_class); 
+				XFree(class_hint->res_name); 
+			}
+			if (XGetClassHint(main_disp, item->window_id, class_hint)){
+				fprintf(fptr, "%s\n", class_hint->res_class);
+				skip_free = 0;
+			} else {
+				skip_free = 1;
+			}
 		}
 	}
 	fprintf(fptr, "# Hidden icons must be listed in reverse order to keep the ordering\n");
 	list_for_each_prev (n, &systray_list) {
 		item = list_entry (n, struct systray_item, systray_list);
 		if (item->rank < 0){
+			if(!skip_free){
+				XFree(class_hint->res_class); 
+				XFree(class_hint->res_name); 
+			}
 			XGetClassHint(main_disp, item->window_id, class_hint);
-			fprintf(fptr, "%s\n", class_hint->res_name);
-			XFree(class_hint->res_name);
-			XFree(class_hint->res_class);
+			skip_free=0;
+			fprintf(fptr, "%s\n", class_hint->res_class);
 		}
 	}
-	XFree(class_hint);
 	fflush(fptr);
 	fclose(fptr);
+	XFree(class_hint);
 }
 
 
