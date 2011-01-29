@@ -347,19 +347,18 @@ void repaint_systray(int new_icon) {
 		
 		item = list_entry (n, struct systray_item, systray_list);
 
-			y = 0;
-			XGetWindowAttributes(main_disp, item->window_id, &wa);
-			/* KLUDGE: it seems like all the newly mapped icons
-			   are suggesting an aspect ratio of 2:1, which
-			   isn't desirable.  Therefore newly mapped
-			   icons are resized to iconsize x iconsize.
-			   Resize requests are handled correctly, and
-			   the width is kept once is set
-			*/
-			w =  (new_icon == item->window_id) ? iconsize :  scale_item_width(wa.width, wa.height, iconsize);
+		y = 0;
+		XGetWindowAttributes(main_disp, item->window_id, &wa);
+		/* KLUDGE: it seems like all the newly mapped icons
+		   are suggesting an aspect ratio of 2:1, which
+		   isn't desirable.  Therefore newly mapped
+		   icons are resized to iconsize x iconsize.
+		   Resize requests are handled correctly, and
+		   the width is kept once is set
+		*/
+		w =  (new_icon == item->window_id) ? iconsize :  scale_item_width(wa.width, wa.height, iconsize);
 		if (show_hidden || !is_hidden(item->window_id)){
 			XMoveResizeWindow (main_disp, item->window_id, x, y, w, iconsize);
-			TRACE((stderr, "(ID:0x%x,W:%d) ", item->window_id, w));
 			x+=w;
 			i++;
 		}else if (new_icon) {
