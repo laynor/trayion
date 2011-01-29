@@ -81,7 +81,7 @@ Icon Sorting: ~/.trayion/trayion-sorted-iconlist.txt
 Icon Hiding:  ~/.trayion/trayion-hidden-iconlist.txt
 
 An initial version of the file can be created issuing the command
-  $ kill -s USR1 <trayion process pid>
+  $ trayion-dump
 in a shell. This will create a file 
  /tmp/trayion-icon-list.txt
 You can copy the contents of the file in 
@@ -93,7 +93,7 @@ and then edit them, changing the ordering of the icons in the first
 one, selecting which icons you want to be hidden in the second one.
 
 The configuration files can be reloaded on the fly issuing the command 
-  $ kill -s USR2 <trayion process pid>
+  $ trayion-reload
 in a shell. 
 
 License/Copyright Information
