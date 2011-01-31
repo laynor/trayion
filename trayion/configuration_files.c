@@ -14,7 +14,7 @@ void reload_config_files()
 	load_hiding_config();
 	if (initialized){
 		recalc_window_ranks();
-		sort_systray_list();
+		/* sort_systray_list(); */
 	}
 	initialized = 1;
 }

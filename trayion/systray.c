@@ -325,6 +325,32 @@ int systray_list_length()
 	}
 	return length;
 }
+int systray_list_is_sorted()
+{
+	struct systray_item *item;
+	struct list_head *n;
+	int prev_rank;
+	item = list_entry (systray_list.next, struct systray_item, systray_list);
+	prev_rank = item->rank;
+	list_for_each (n, &systray_list) {
+		item = list_entry (n, struct systray_item, systray_list);
+		if(item->rank < prev_rank)
+			return 0;
+		prev_rank = item->rank;
+	}
+	return 1;
+}
+int compare_items(struct list_head *a, struct list_head *b)
+{
+	struct systray_item *it1, *it2;
+	it1 = list_entry(a, struct systray_item, systray_list);
+	it2 = list_entry(b, struct systray_item, systray_list);
+	return it1->rank - it2->rank;
+}
+void sort_systray_list()
+{
+	list_sort(&systray_list, compare_items);
+}
 
 /*
  * repaint_systray
@@ -336,13 +362,15 @@ void repaint_systray(int new_icon) {
 	struct list_head *n;
 	int x, y, w;
 	int i = 0;
-	int length;
 	XWindowAttributes wa;
 	TRACE((stderr, "ENTERING: repaint_systray\n"));
 
 	/*draw_ui_elements();*/
 	x = 0;
-	length = systray_list_length();
+	if(!systray_list_is_sorted()){
+		printf("resorting\n");
+		sort_systray_list();
+	}
 	list_for_each (n, &systray_list) {
 		
 		item = list_entry (n, struct systray_item, systray_list);
@@ -364,7 +392,7 @@ void repaint_systray(int new_icon) {
 			i++;
 		}else {
 			/* Move window outside the clipping area */
-			XMoveWindow(main_disp, item->window_id, -w, y);
+			XMoveWindow(main_disp, item->window_id, -w, -2 * iconsize);
 		}
 
 #if 0
@@ -405,17 +433,6 @@ void print_geometry (Window embed_wind) {
 			width, height, x, y, border_width, depth));
 }
 
-int compare_items(struct list_head *a, struct list_head *b)
-{
-	struct systray_item *it1, *it2;
-	it1 = list_entry(a, struct systray_item, systray_list);
-	it2 = list_entry(b, struct systray_item, systray_list);
-	return it1->rank - it2->rank;
-}
-void sort_systray_list()
-{
-	list_sort(&systray_list, compare_items);
-}
 /*
  * handle_dock_request
  *
@@ -502,7 +519,7 @@ int handle_dock_request (Window embed_wind) {
 	status = xembed_modality_off (main_disp, embed_wind);
 	XSync (main_disp, False);
 	*/
-	sort_systray_list();
+	/* sort_systray_list(); */
 	repaint_systray(item->window_id);
 	TRACE((stderr, "LEAVING: handle_dock_request\n"));
 	return 0;
