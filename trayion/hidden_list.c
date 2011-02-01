@@ -23,6 +23,7 @@ int is_hidden(Window window)
 	XClassHint *class_hint;
 	struct list_head *n;
 	struct string_item *item;
+	TRACE((stderr, "ENTERING: is_hidden\n"));
 	class_hint = XAllocClassHint();
 	if(!XGetClassHint(main_disp, window, class_hint)){
 		XFree(class_hint);
@@ -37,5 +38,6 @@ int is_hidden(Window window)
 		}
 	}
 	XFree(class_hint);
+	TRACE((stderr, "LEAVING: is_hidden\n"));
 	return 0;
 }

@@ -4,6 +4,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "trace.h"
 #include "ui.h"
 #include "string_list.h"
 #include "sorted_classes.h"
@@ -27,6 +28,7 @@ int window_rank(Window window)
 	XClassHint *class_hint;
 	struct list_head *n;
 	struct string_item *item;
+	TRACE((stderr, "ENTERING: window_rank\n"));
 	class_hint = XAllocClassHint();
 	if(!XGetClassHint(main_disp, window, class_hint)){
 		XFree(class_hint);
@@ -43,5 +45,6 @@ int window_rank(Window window)
 		i++;
 	}
 	XFree(class_hint);
+	TRACE((stderr, "ENTERING: window_rank\n"));
 	return INT_MAX;
 }
