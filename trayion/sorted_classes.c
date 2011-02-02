@@ -45,6 +45,6 @@ int window_rank(Window window)
 		i++;
 	}
 	XFree(class_hint);
-	TRACE((stderr, "ENTERING: window_rank\n"));
+	TRACE((stderr, "LEAVING: window_rank\n"));
 	return INT_MAX;
 }
