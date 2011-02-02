@@ -1,0 +1,22 @@
+* NOTES
+- Checking pointer absolute coordinates
+  <daniels> ale`: on the client side? XTranslateCoordinates with root_[xy] and
+    the root window as the source
+
+* DONE Add icon hiding support
+  - State "DONE"       from "TODO"       [2011-01-27 Thu 21:03]
+  - load a file with a list of hidden window classes
+  - add a variable draw_hidden, set to 1 on EnterNotify, set to 0 on LeaveNotify; Repaint
+  - change the Repaint routine accordingly
+  
+* FIXED Repeated enter and leave event whith uim-toolbar-gtk-systray
+  - State "KNOWNCAUSE" from "BUG"        [2011-01-29 Sat 04:56] \\
+    Repainting causes leave and enter events, and that happened when resizing too. Resizing didn't set the ignore-next-leave-event flag.
+  enter/leave scheme:
+
+* FIXED sometimes icons don't respect hiding/sorting
+  - State "KNOWNCAUSE" from "BUG"        [2011-01-29 Sat 20:59] \\
+    It's not icon shuffling. Icons up the window stack cover unhidden windows because they are placed in the same position.
+  After unhide/hide, the not-hidden icons shuffle or some not-hidden icon "swaps" with a hidden one. Fixed moving the icon windows outside
+  the parent clipping area.
+* TODO Refactoring code
