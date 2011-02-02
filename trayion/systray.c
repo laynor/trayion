@@ -392,6 +392,23 @@ void sort_systray_list()
 	list_sort(&systray_list, compare_items);
 	TRACE((stderr, "LEAVING: sort_systray_list\n"));
 }
+/* set_icon_size_hints
+ *
+ * Sets the size hints of the icon window so that
+ * it doesn't try to resize itself higher than iconsize.
+ * This is necessary for tray icons like msn that look
+ * at the max_widht and max_height values trying not to
+ * shrink to the suggested size.
+ */ 
+void set_icon_size_hints(Window iconw, int icon_width)
+{
+	sh = XAllocSizeHints();
+	sh->flags = PMaxSize;
+	sh->max_width = wa.width;
+	sh->max_height = iconsize;
+	XSetNormalHints(main_disp, iconw, sh);
+	XFree(sh);
+}
 
 /*
  * repaint_systray
@@ -404,6 +421,7 @@ void repaint_systray(int new_icon) {
 	int x, y, w;
 	int i = 0;
 	XWindowAttributes wa;
+	XSizeHints *sh;
 	TRACE((stderr, "ENTERING: repaint_systray\n"));
 
 	/*draw_ui_elements();*/
@@ -426,6 +444,7 @@ void repaint_systray(int new_icon) {
 		   the width is kept once is set
 		*/
 		w =  (new_icon == item->window_id) ? iconsize :  scale_item_width(wa.width, wa.height, iconsize);
+		set_icon_size_hints(item->window_id, w);
 		XResizeWindow(main_disp, item->window_id, w, iconsize);
 		if (show_hidden || !is_hidden(item->window_id)){
 			XMoveWindow (main_disp, item->window_id, x, y);
