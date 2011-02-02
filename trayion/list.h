@@ -42,7 +42,7 @@
 		}							    \
 	} while (0);
 
-#define prefetch(x)
+#define prefetch(x) (void *)0
 
 /*
 #include <linux/stddef.h>
