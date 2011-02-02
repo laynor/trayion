@@ -40,7 +40,6 @@ int window_rank(Window window)
 		if(!strcmp(item->info, class_hint->res_class)){
 			XFree(class_hint);
 			return i;
-			break;
 		}
 		i++;
 	}
