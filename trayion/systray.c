@@ -37,31 +37,6 @@ struct list_head *current_item = &systray_list;
 
 int systray_item_count = 0, systray_current_item_no = 0;
 int place_hidden_items_on_the_left=1;
-static int (*old_error_handler)(Display *, XErrorEvent *) = NULL;
-int bad_window=0;
-
-int is_bad_window_handler(Display *dpy, XErrorEvent *e)
-{
-	if(e->error_code == BadWindow){
-		bad_window = 1;
-	}else{
-		bad_window = 0;
-		assert(old_error_handler);
-		(*old_error_handler)(dpy, e);
-	}
-	return 0;
-}
-int is_bad_window(Window w)
-{
-	XWindowAttributes attr;
-	bad_window = 0;
-	XSync(main_disp, False);
-	old_error_handler = XSetErrorHandler(is_bad_window_handler);
-	XGetWindowAttributes(main_disp, w, &attr);
-	XSync(main_disp, False);
-	XSetErrorHandler(old_error_handler);
-	return bad_window;
-}
 
 int handle_dock_request (Window embed_wind);
 
@@ -247,7 +222,7 @@ int handle_systray_event(XEvent *ev) {
 		/* KLUDGE: Check for bad windows when docking
 		   Maybe it's better to find another way?
 		 */
-		if (!is_bad_window(ev->xclient.data.l[2]))
+		if (!is_bad_window(main_disp, ev->xclient.data.l[2]))
 			handle_dock_request (ev->xclient.data.l[2]);
 		break;
 
