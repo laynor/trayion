@@ -28,6 +28,7 @@
 #include "ui.h"
 #include "sorted_classes.h"
 #include "hidden_list.h"
+#include "xutils.h"
 
 static Atom systray_atom = None;
 static Atom opcode_atom = None;
@@ -354,6 +355,7 @@ int systray_list_is_sorted()
 	}
 	return 1;
 }
+
 int compare_items(struct list_head *a, struct list_head *b)
 {
 	struct systray_item *it1, *it2;
@@ -361,6 +363,7 @@ int compare_items(struct list_head *a, struct list_head *b)
 	it2 = list_entry(b, struct systray_item, systray_list);
 	return it1->rank - it2->rank;
 }
+
 void sort_systray_list()
 {
 	TRACE((stderr, "ENTERING: sort_systray_list\n"));
@@ -377,9 +380,10 @@ void sort_systray_list()
  */ 
 void set_icon_size_hints(Window iconw, int icon_width)
 {
+	XSizeHints *sh;
 	sh = XAllocSizeHints();
 	sh->flags = PMaxSize;
-	sh->max_width = wa.width;
+	sh->max_width = icon_width;
 	sh->max_height = iconsize;
 	XSetNormalHints(main_disp, iconw, sh);
 	XFree(sh);
@@ -396,7 +400,6 @@ void repaint_systray(int new_icon) {
 	int x, y, w;
 	int i = 0;
 	XWindowAttributes wa;
-	XSizeHints *sh;
 	TRACE((stderr, "ENTERING: repaint_systray\n"));
 
 	/*draw_ui_elements();*/
@@ -506,7 +509,10 @@ int handle_dock_request (Window embed_wind) {
 	INIT_LIST_HEAD (& item->systray_list);
 	memcpy (&item->info, &info, sizeof(info));
 	item->window_id = embed_wind;
+
+	/* Assigning a rank to the item */
 	item->rank = window_rank(item->window_id);
+
 	if (place_hidden_items_on_the_left && is_hidden(item->window_id)){
 		item->rank = - item->rank;
 	}
