@@ -26,6 +26,7 @@
 #include "ui.h"
 #include "hidden_list.h"
 #include "configuration_files.h"
+#include "xutils.h"
 
 
 Display *main_disp;
@@ -323,13 +324,13 @@ void print_item_info(const char* fname)
 	fptri = fopen("/tmp/tray-icon-infos.txt", "w");
 	list_for_each (n, &systray_list) {
 		item = list_entry (n, struct systray_item, systray_list);
-		if (item->rank >= 0){
+		if (item->rank >= 0) {
 			fprintf(fptri, "ID = 0x%x ", (unsigned int) item->window_id);
-			if(!skip_free){
+			if(!skip_free) {
 				XFree(class_hint->res_class); 
 				XFree(class_hint->res_name); 
 			}
-			if (XGetClassHint(main_disp, item->window_id, class_hint)){
+			if (XGetClassHint(main_disp, item->window_id, class_hint)) {
 				fprintf(fptr, "%s\n", class_hint->res_class);
 				fprintf(fptri, "class: '%s', name: '%s'",
 					class_hint->res_class, class_hint->res_name);
@@ -343,8 +344,8 @@ void print_item_info(const char* fname)
 	fprintf(fptr, "# Hidden icons must be listed in reverse order to keep the ordering\n");
 	list_for_each_prev (n, &systray_list) {
 		item = list_entry (n, struct systray_item, systray_list);
-		if (item->rank < 0){
-			if(!skip_free){
+		if (item->rank < 0) {
+			if(!skip_free) {
 				XFree(class_hint->res_class); 
 				XFree(class_hint->res_name); 
 			}
@@ -364,6 +365,16 @@ void print_item_info(const char* fname)
 }
 
 
+int pointer_inside_tray()
+{
+	int mouse_x, mouse_y;
+	XWindowAttributes attrib;
+	XGetWindowAttributes(main_disp, icon_wind, &attrib);
+	get_pointer_pos(main_disp, icon_wind, &mouse_x, &mouse_y);
+	return  (mouse_x <= attrib.width) && (mouse_x >= 0 ) &&
+		(mouse_y <= attrib.height) && (mouse_y >= 0);
+}
+
 /*
  * wmsystray_handle_signal
  *
@@ -371,8 +382,17 @@ void print_item_info(const char* fname)
  */
 void wmsystray_handle_signal (int signum) {
 	switch (signum) {
+		case SIGALRM:
+			if (!pointer_inside_tray()) {
+				show_hidden=0;
+				repaint_systray(0);
+			} else {
+				alarm(1);
+			}
+
 		case SIGUSR1:
 			print_item_info("/tmp/trayion-icon-list.txt");
+			printf ("%d\n", pointer_inside_tray());
 			break;
 		case SIGUSR2:
 			reload_config_files();
@@ -388,19 +408,23 @@ void wmsystray_handle_signal (int signum) {
 
 void handle_enter_event()
 {
-	if (!skip_next_enter_event){
-		show_hidden = 1;
-		skip_next_leave_event = 1;
-		repaint_systray(0);
+	if (!skip_next_enter_event) {
+		alarm(0);
+		if(!show_hidden) {
+			show_hidden = 1;
+			skip_next_leave_event = 1;
+			repaint_systray(0);
+		}
 	} else {
 		skip_next_enter_event = 0;
 	}
 }
+
 void handle_leave_event()
 {
-	if (!skip_next_leave_event){
-		show_hidden=0;
-		repaint_systray(0);
+	
+	if (!skip_next_leave_event) {
+		alarm(2);
 	} else {
 		skip_next_leave_event = 0;
 		skip_next_enter_event = 1;
@@ -409,21 +433,12 @@ void handle_leave_event()
 
 void check_pointer_inside_tray_kludge()
 {
-	Window root_return, child_return;
-	int pointer_root_x, pointer_root_y, window_x, window_y;
-	unsigned int pointer_mask;
 	static int iteration=0;
-	XWindowAttributes attrib;
+
 	iteration++;
-	if (iteration%100==0) {
-		XQueryPointer(main_disp, icon_wind, &root_return, &child_return, 
-			      &pointer_root_x, &pointer_root_y,
-			      &window_x, &window_y, &pointer_mask);
-		XGetWindowAttributes(main_disp, main_wind, &attrib);
-		if(!child_return && show_hidden && !skip_next_leave_event){
-			show_hidden = 0;
-			XSync(main_disp, False);
-			repaint_systray(0);
+	if (iteration%20==0) { /* UGLY: Still counting iterations! */
+		if(!pointer_inside_tray() && !skip_next_leave_event) {
+			alarm(2);
 		}
 	}
 }
@@ -525,7 +540,7 @@ void wmsystray_event_loop() {
 							
 				TRACE((stderr, "Window %x trying to resize to %dx%d.\n", (unsigned int)ev.xproperty.window, attrib.width, attrib.height));
 
-				if ((attrib.height != iconsize)){
+				if ((attrib.height != iconsize)) {
 					int ww;
 					ww = scale_item_width(attrib.width, attrib.height, iconsize);
 					XResizeWindow (main_disp,

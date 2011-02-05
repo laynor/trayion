@@ -56,6 +56,7 @@ int main(int argc, char **argv) {
 	sigaction (SIGINT, &act, &oldact);
 	sigaction (SIGUSR1, &act, &oldact);
 	sigaction (SIGUSR2, &act, &oldact);
+	sigaction (SIGALRM, &act, &oldact);
 
 	if (init_ui ("wmsystray", argc, argv) != 0) {
 		printf ("Could not connect to X server!\n");
