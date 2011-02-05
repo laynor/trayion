@@ -30,3 +30,13 @@ int is_bad_window(Display *dpy, Window w)
 	XSetErrorHandler(old_error_handler);
 	return bad_window;
 }
+
+void get_pointer_pos(Display *disp, Window w, int *x, int*y)
+{
+	int root_x, root_y;
+	unsigned int pointer_mask;
+	Window child_return, root_return;
+	XQueryPointer(disp, w, &root_return, &child_return, 
+		      &root_x, &root_y,
+		      x, y, &pointer_mask);
+}
