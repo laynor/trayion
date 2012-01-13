@@ -19,7 +19,7 @@
     It's not icon shuffling. Icons up the window stack cover unhidden windows because they are placed in the same position.
   After unhide/hide, the not-hidden icons shuffle or some not-hidden icon "swaps" with a hidden one. Fixed moving the icon windows outside
   the parent clipping area.
-* STARTED Refactoring code
+* WAITING Refactoring code
   - State "STARTED"    from "TODO"       [2011-02-02 Wed 02:38]
   :LOGBOOK:
   CLOCK: [2011-02-02 Wed 02:38]

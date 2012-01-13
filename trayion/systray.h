@@ -49,5 +49,5 @@ struct systray_item *find_systray_item(Window id);
 int systray_property_update(struct systray_item *item);
 void recalc_window_ranks();
 void sort_systray_list();
-
+Atom client_event_atom;
 #endif

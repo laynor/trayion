@@ -27,10 +27,10 @@
 #include "hidden_list.h"
 #include "configuration_files.h"
 #include "xutils.h"
-
+#include "client_messages.h"
 
 Display *main_disp;
-Window main_wind, sel_wind, icon_wind, draw_wind;
+Window main_wind, sel_wind, icon_wind, draw_wind, s_wind;
 char *display_string = NULL;
 /*char *geometry_string = "64x64+0+0";*/
 int width, height, pos_x, pos_y;
@@ -71,8 +71,9 @@ void wmsystray_resize(int width, int height) {
 	XSizeHints *size_hints;
 	
 	/* Unmap windows to be sure the Window Manager will be notified. */
-	XUnmapWindow (main_disp, icon_wind);
-	XUnmapWindow (main_disp, main_wind);
+	/* XUnmapWindow (main_disp, icon_wind); */
+	/* XUnmapWindow (main_disp, main_wind); */
+	XUnmapWindow(main_disp, draw_wind);
 	XFlush (main_disp);
 	
 	/* Set the size hints and resize this stuff! */
@@ -83,15 +84,19 @@ void wmsystray_resize(int width, int height) {
 	size_hints->min_width  = size_hints->max_width  = size_hints->width  = width;
  	size_hints->min_height = size_hints->max_height = size_hints->height = height;
 
-	XSetWMNormalHints (main_disp, icon_wind, size_hints);
-	XResizeWindow     (main_disp, icon_wind, width, height);
+	XSetWMNormalHints (main_disp, draw_wind, size_hints);
+	XResizeWindow     (main_disp, draw_wind, width, height);
+
+	/* XSetWMNormalHints (main_disp, icon_wind, size_hints); */
+	/* XResizeWindow     (main_disp, icon_wind, width, height); */
  
-	XSetWMNormalHints (main_disp, main_wind, size_hints);
-	XResizeWindow     (main_disp, main_wind, width, height);
+	/* XSetWMNormalHints (main_disp, main_wind, size_hints); */
+	/* XResizeWindow     (main_disp, main_wind, width, height); */
 	
 	/* Remap windows so the user can see them. */
-	XMapWindow (main_disp, main_wind);
-	XMapSubwindows (main_disp, icon_wind);
+	//XMapWindow (main_disp, main_wind);
+	XMapWindow(main_disp, main_wind);
+	XMapSubwindows (main_disp, draw_wind);
 	XFlush (main_disp);
 	
 	XFree (size_hints);
@@ -243,6 +248,7 @@ int init_ui(char *app_name, int argc, char **argv) {
 
 
 	TRACE((stderr, "LEAVING: init_ui\n"));
+	/* printf("MAIN_WIND: %x, ICONWIND %x\n", main_wind, icon_wind); */
 	return 0;
 }
 
@@ -332,8 +338,8 @@ void print_item_info(const char* fname)
 			}
 			if (XGetClassHint(main_disp, item->window_id, class_hint)) {
 				fprintf(fptr, "%s\n", class_hint->res_class);
-				fprintf(fptri, "class: '%s', name: '%s'",
-					class_hint->res_class, class_hint->res_name);
+				fprintf(fptri, "class: '%s', name: '%s', rank: '%d'",
+					class_hint->res_class, class_hint->res_name, item->rank);
 				skip_free = 0;
 			} else {
 				skip_free = 1;
@@ -341,8 +347,8 @@ void print_item_info(const char* fname)
 			fprintf(fptri, "\n");
 		}
 	}
-	fprintf(fptr, "# Hidden icons must be listed in reverse order to keep the ordering\n");
-	list_for_each_prev (n, &systray_list) {
+	fprintf(fptr, "# Hidden icons\n"); 
+	list_for_each (n, &systray_list) {
 		item = list_entry (n, struct systray_item, systray_list);
 		if (item->rank < 0) {
 			if(!skip_free) {
@@ -350,9 +356,9 @@ void print_item_info(const char* fname)
 				XFree(class_hint->res_name); 
 			}
 			XGetClassHint(main_disp, item->window_id, class_hint);
-			fprintf(fptri, "ID = 0x%x class: '%s', name: '%s'\n",
+			fprintf(fptri, "ID = 0x%x class: '%s', name: '%s', rank: '%d'\n",
 				(unsigned int) item->window_id,
-				class_hint->res_class, class_hint->res_name);
+				class_hint->res_class, class_hint->res_name, item->rank);
 			skip_free=0;
 			fprintf(fptr, "%s\n", class_hint->res_class);
 		}
@@ -369,8 +375,8 @@ int pointer_inside_tray()
 {
 	int mouse_x, mouse_y;
 	XWindowAttributes attrib;
-	XGetWindowAttributes(main_disp, icon_wind, &attrib);
-	get_pointer_pos(main_disp, icon_wind, &mouse_x, &mouse_y);
+	XGetWindowAttributes(main_disp, draw_wind, &attrib);
+	get_pointer_pos(main_disp, draw_wind, &mouse_x, &mouse_y);
 	return  (mouse_x <= attrib.width) && (mouse_x >= 0 ) &&
 		(mouse_y <= attrib.height) && (mouse_y >= 0);
 }
@@ -389,10 +395,11 @@ void wmsystray_handle_signal (int signum) {
 			} else {
 				alarm(1);
 			}
+			break;
 
 		case SIGUSR1:
 			print_item_info("/tmp/trayion-icon-list.txt");
-			printf ("%d\n", pointer_inside_tray());
+			/* printf ("%d\n", pointer_inside_tray()); */
 			break;
 		case SIGUSR2:
 			reload_config_files();
@@ -441,6 +448,43 @@ void check_pointer_inside_tray_kludge()
 			alarm(2);
 		}
 	}
+}
+
+int event_is_client_event(XEvent* ev)
+{
+	return ev->xclient.type == ClientMessage &&
+		ev->xclient.message_type == client_event_atom;
+}
+
+void handle_client_event(XEvent *ev)
+{
+	switch (ev->xclient.data.l[0]) {
+		case TRAYION_SEL_LEFT:
+			TRACE((stderr, "sel_left\n"));
+			break;
+		case TRAYION_SEL_RIGHT:
+			TRACE((stderr, "sel_right\n"));
+			break;
+		case TRAYION_SHOW_SEL:
+			TRACE((stderr, "sel_show_sel\n"));
+			break;
+		case TRAYION_HIDE_SEL:
+			TRACE((stderr, "sel_hide_sel\n"));
+			break;
+		case TRAYION_TOGGLE_SEL:
+			TRACE((stderr, "sel_toggle_sel\n"));
+			break;
+		case TRAYION_MOVE_LEFT:
+			TRACE((stderr, "sel_left\n"));
+			break;
+		case TRAYION_MOVE_RIGHT:
+			TRACE((stderr, "sel_right\n"));
+			break;
+		case TRAYION_TOGGLE_HIDING:
+			TRACE((stderr, "sel_hide_sel\n"));
+			break;
+	}
+
 }
 /*
  * wmsystray_event_loop
@@ -494,6 +538,9 @@ void wmsystray_event_loop() {
 				continue;
 			}
 
+			if (event_is_client_event(&ev)) {
+				handle_client_event(&ev);
+			}
 			switch (ev.type) {
 			case MapRequest:
 				item = find_systray_item(ev.xmaprequest.window);

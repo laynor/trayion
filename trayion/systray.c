@@ -29,9 +29,11 @@
 #include "sorted_classes.h"
 #include "hidden_list.h"
 #include "xutils.h"
+#include "client_messages.h"
 
 static Atom systray_atom = None;
 static Atom opcode_atom = None;
+Atom client_event_atom = None;
 static Atom message_atom = None;
 struct list_head systray_list;
 struct list_head *current_item = &systray_list;
@@ -67,6 +69,7 @@ int init_systray() {
 	opcode_atom = XInternAtom (main_disp, "_NET_SYSTEM_TRAY_OPCODE", False);
 	message_atom = XInternAtom (main_disp, "_NET_SYSTEM_TRAY_MESSAGE_DATA",
 				    False);
+	client_event_atom = XInternAtom(main_disp, CLIENT_EVENT_ATOM_NAME, False);
 
 	/*
 	 * Selection managers are required to broadcast their existence when
@@ -405,7 +408,7 @@ void repaint_systray(int new_icon) {
 	/*draw_ui_elements();*/
 	x = 0;
 	if(!systray_list_is_sorted()){
-		printf("resorting\n");
+		/* printf("resorting\n"); */
 		sort_systray_list();
 	}
 	list_for_each (n, &systray_list) {
@@ -514,7 +517,7 @@ int handle_dock_request (Window embed_wind) {
 	item->rank = window_rank(item->window_id);
 
 	if (place_hidden_items_on_the_left && is_hidden(item->window_id)){
-		item->rank = - item->rank;
+		item->rank = pushed_left_rank(item->rank);
 	}
 	list_add_tail (&item->systray_list, &systray_list);
 
