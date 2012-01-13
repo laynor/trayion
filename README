@@ -77,17 +77,17 @@ line argument. The default size is 14 pixels.
 
 Config Files
 ============
-Icon Sorting: ~/.trayion/trayion-sorted-iconlist.txt
-Icon Hiding:  ~/.trayion/trayion-hidden-iconlist.txt
+Icon Sorting: ~/.trayion/sorted-iconlist.conf
+Icon Hiding:  ~/.trayion/hidden-iconlist.conf
 
 An initial version of the file can be created issuing the command
   $ trayion-dump
 in a shell. This will create a file 
- /tmp/trayion-icon-list.txt
+ /tmp/sorted-iconlist.conf
 You can copy the contents of the file in 
-~/.trayion/trayion-sorted-iconlist.txt
+~/.trayion/sorted-iconlist.conf
 and 
-~/.trayion/trayion-hidden-iconlist.txt 
+~/.trayion/hidden-iconlist.conf
 
 and then edit them, changing the ordering of the icons in the first
 one, selecting which icons you want to be hidden in the second one.
