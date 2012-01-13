@@ -3,6 +3,7 @@
 
 #define SORTING_CONFIG_FILE ".trayion/sorted-iconlist.conf"
 #define HIDING_CONFIG_FILE ".trayion/hidden-iconlist.conf"
+#define DUMP_FILE "/tmp/sorted-iconlist.conf"
 
 void ensure_default_cfg();
 char* home_relative_path(char *rpath);

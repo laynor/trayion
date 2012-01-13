@@ -398,7 +398,7 @@ void wmsystray_handle_signal (int signum) {
 			break;
 
 		case SIGUSR1:
-			print_item_info("/tmp/trayion-icon-list.txt");
+			print_item_info(DUMP_FILE); /* Find me in configuration_files.h */
 			/* printf ("%d\n", pointer_inside_tray()); */
 			break;
 		case SIGUSR2:
