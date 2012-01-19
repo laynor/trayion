@@ -27,7 +27,7 @@
 #include "hidden_list.h"
 #include "configuration_files.h"
 #include "xutils.h"
-#include "client_messages.h"
+/* #include "client_messages.h" */
 
 Display *main_disp;
 Window main_wind, sel_wind, icon_wind, draw_wind, s_wind;
@@ -450,42 +450,6 @@ void check_pointer_inside_tray_kludge()
 	}
 }
 
-int event_is_client_event(XEvent* ev)
-{
-	return ev->xclient.type == ClientMessage &&
-		ev->xclient.message_type == client_event_atom;
-}
-
-void handle_client_event(XEvent *ev)
-{
-	switch (ev->xclient.data.l[0]) {
-		case TRAYION_SEL_LEFT:
-			TRACE((stderr, "sel_left\n"));
-			break;
-		case TRAYION_SEL_RIGHT:
-			TRACE((stderr, "sel_right\n"));
-			break;
-		case TRAYION_SHOW_SEL:
-			TRACE((stderr, "sel_show_sel\n"));
-			break;
-		case TRAYION_HIDE_SEL:
-			TRACE((stderr, "sel_hide_sel\n"));
-			break;
-		case TRAYION_TOGGLE_SEL:
-			TRACE((stderr, "sel_toggle_sel\n"));
-			break;
-		case TRAYION_MOVE_LEFT:
-			TRACE((stderr, "sel_left\n"));
-			break;
-		case TRAYION_MOVE_RIGHT:
-			TRACE((stderr, "sel_right\n"));
-			break;
-		case TRAYION_TOGGLE_HIDING:
-			TRACE((stderr, "sel_hide_sel\n"));
-			break;
-	}
-
-}
 /*
  * wmsystray_event_loop
  *
@@ -538,9 +502,6 @@ void wmsystray_event_loop() {
 				continue;
 			}
 
-			if (event_is_client_event(&ev)) {
-				handle_client_event(&ev);
-			}
 			switch (ev.type) {
 			case MapRequest:
 				item = find_systray_item(ev.xmaprequest.window);
