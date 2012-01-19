@@ -29,11 +29,9 @@
 #include "sorted_classes.h"
 #include "hidden_list.h"
 #include "xutils.h"
-#include "client_messages.h"
 
 static Atom systray_atom = None;
 static Atom opcode_atom = None;
-Atom client_event_atom = None;
 static Atom message_atom = None;
 struct list_head systray_list;
 struct list_head *current_item = &systray_list;
@@ -69,7 +67,6 @@ int init_systray() {
 	opcode_atom = XInternAtom (main_disp, "_NET_SYSTEM_TRAY_OPCODE", False);
 	message_atom = XInternAtom (main_disp, "_NET_SYSTEM_TRAY_MESSAGE_DATA",
 				    False);
-	client_event_atom = XInternAtom(main_disp, CLIENT_EVENT_ATOM_NAME, False);
 
 	/*
 	 * Selection managers are required to broadcast their existence when
