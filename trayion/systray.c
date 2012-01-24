@@ -397,9 +397,11 @@ void set_icon_size_hints(Window iconw, int icon_width)
 void repaint_systray(int new_icon) {
 	struct systray_item *item;
 	struct list_head *n;
+	int res;
 	int x, y, w;
 	int i = 0;
-	XWindowAttributes wa;
+	XWindowAttributes wa, stwa;
+	unsigned int new_width;
 	TRACE((stderr, "ENTERING: repaint_systray\n"));
 
 	/*draw_ui_elements();*/
@@ -441,11 +443,16 @@ void repaint_systray(int new_icon) {
 	TRACE((stderr, "\n"));
 	
 	/* Resize the area. */
-	TRACE((stderr, "RESIZE: resizing systray to %d icons.\n", systray_item_count));
-	if(systray_item_count > 0)
-		wmsystray_resize(systray_total_width(), iconsize);
-	else
+	res = XGetWindowAttributes(main_disp, draw_wind, &stwa);
+	new_width = systray_total_width();
+	if(systray_item_count > 0){
+		if( new_width != stwa.width || !res ) {
+			TRACE((stderr, "RESIZE: resizing systray to %d icons.\n", systray_item_count));
+			wmsystray_resize(new_width, iconsize);
+		}
+	} else {
 		wmsystray_resize(iconsize, iconsize);
+	}
 	
 	XSync (main_disp, False);
 	TRACE((stderr, "LEAVING: repaint_systray\n"));
