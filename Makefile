@@ -19,4 +19,5 @@ install: trayion/trayion
 	${INSTALLPROG} trayion/trayion ${bindir}/trayion
 	${INSTALLPROG} trayion-dump.sh ${bindir}/trayion-dump
 	${INSTALLPROG} trayion-reload.sh ${bindir}/trayion-reload
+	${INSTALLPROG} trayion-crash-kludge.sh ${bindir}/trayion-crash-kludge.sh
 	${INSTALLMAN} doc/trayion.1 ${mandir}/man1/trayion.1
