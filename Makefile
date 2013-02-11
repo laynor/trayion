@@ -14,10 +14,10 @@ clean:
 	make -C trayion clean
 
 install: trayion/trayion
-	mkdir -p ${bindir}
-	mkdir -p ${mandir}/man1
-	${INSTALLPROG} trayion/trayion ${bindir}/trayion
-	${INSTALLPROG} trayion-dump.sh ${bindir}/trayion-dump
-	${INSTALLPROG} trayion-reload.sh ${bindir}/trayion-reload
-	${INSTALLPROG} trayion-crash-kludge.sh ${bindir}/trayion-crash-kludge.sh
-	${INSTALLMAN} doc/trayion.1 ${mandir}/man1/trayion.1
+	mkdir -p ${DESTDIR}${bindir}
+	mkdir -p ${DESTDIR}${mandir}/man1
+	${INSTALLPROG} trayion/trayion ${DESTDIR}${bindir}/trayion
+	${INSTALLPROG} trayion-dump.sh ${DESTDIR}${bindir}/trayion-dump
+	${INSTALLPROG} trayion-reload.sh ${DESTDIR}${bindir}/trayion-reload
+	${INSTALLPROG} trayion-crash-kludge.sh ${DESTDIR}${bindir}/trayion-crash-kludge.sh
+	${INSTALLMAN} doc/trayion.1 ${DESTDIR}${mandir}/man1/trayion.1
