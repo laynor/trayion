@@ -1,12 +1,12 @@
 /*
  * systray.c
- * 
+ *
  * Initialize and clean up the systray area; handle X protocol junk
  * relating to systray communication.
- * 
+ *
  * Copyright (c) 2008 Paulo Matias
  * Copyright (c) 2004 Matthew Reppert
- * 
+ *
  * Use of this code is permitted under the code of the GNU General
  * Public License version 2 (and only version 2).
  */
@@ -49,7 +49,7 @@ int handle_dock_request (Window embed_wind);
  */
 int init_systray() {
 	char atom_name[22] = "_NET_SYSTEM_TRAY_S0";
-	XEvent ev;
+        XClientMessageEvent ev;
 
 	INIT_LIST_HEAD (&systray_list);
 
@@ -73,15 +73,16 @@ int init_systray() {
 	 * they become selection managers.
 	 */
 	ev.type = ClientMessage;
-	ev.xclient.message_type = XInternAtom (main_disp, "MANAGER", False);
-	ev.xclient.format = 32;
-	ev.xclient.data.l[0] = CurrentTime;
-	ev.xclient.data.l[1] = systray_atom; 
-	ev.xclient.data.l[2] = sel_wind;
-	ev.xclient.data.l[3] = 0;
-	ev.xclient.data.l[4] = 0;
+        ev.window = DefaultRootWindow(main_disp);
+        ev.message_type = XInternAtom (main_disp, "MANAGER", False);
+        ev.format = 32;
+        ev.data.l[0] = CurrentTime;
+        ev.data.l[1] = systray_atom;
+        ev.data.l[2] = sel_wind;
+        ev.data.l[3] = 0;
+        ev.data.l[4] = 0;
 	XSendEvent (main_disp, DefaultRootWindow(main_disp), False,
-		    StructureNotifyMask, &ev);
+                    StructureNotifyMask, (XEvent*)&ev);
 
 	return 0;
 }
@@ -98,7 +99,7 @@ void cleanup_systray() {
 	struct list_head *n;
 	struct systray_item *item;
 
-	if (systray_atom != None) 
+	if (systray_atom != None)
 		XSetSelectionOwner (main_disp, systray_atom, None, CurrentTime);
 
 	list_for_each (n, &systray_list) {
@@ -219,7 +220,7 @@ int handle_systray_event(XEvent *ev) {
 		 */
 		TRACE2((stderr, "DOCK REQUEST from window %x\n",
 				 (unsigned int)ev->xclient.data.l[2]));
-		
+
 		/* KLUDGE: Check for bad windows when docking
 		   Maybe it's better to find another way?
 		 */
@@ -243,7 +244,7 @@ int handle_systray_event(XEvent *ev) {
 	}
 
 	TRACE((stderr, "LEAVING: handle_systray_event\n"));
-	return 0;	
+	return 0;
 }
 
 /*
@@ -268,7 +269,7 @@ int systray_total_width()
 	int tw=0;
 	struct systray_item *item;
 	XWindowAttributes xwa;
-   
+
 	TRACE((stderr, "ENTERING: systray_total_width\n"));
 	tw = 0;
 	list_for_each (l, &systray_list) {
@@ -319,9 +320,9 @@ void recalc_window_ranks()
 {
 	struct list_head *l;
 	struct systray_item *item;
-   
+
 	TRACE((stderr, "ENTERING: recalc_window_ranks\n"));
-	
+
 	list_for_each (l, &systray_list) {
 		item = list_entry (l, struct systray_item, systray_list);
 		item->rank = window_rank(item->window_id);
@@ -377,7 +378,7 @@ void sort_systray_list()
  * This is necessary for tray icons like msn that look
  * at the max_widht and max_height values trying not to
  * shrink to the suggested size.
- */ 
+ */
 void set_icon_size_hints(Window iconw, int icon_width)
 {
 	XSizeHints *sh;
@@ -411,7 +412,7 @@ void repaint_systray(int new_icon) {
 		sort_systray_list();
 	}
 	list_for_each (n, &systray_list) {
-		
+
 		item = list_entry (n, struct systray_item, systray_list);
 
 		y = 0;
@@ -441,7 +442,7 @@ void repaint_systray(int new_icon) {
 #endif
 	}
 	TRACE((stderr, "\n"));
-	
+
 	/* Resize the area. */
 	res = XGetWindowAttributes(main_disp, draw_wind, &stwa);
 	new_width = systray_total_width();
@@ -453,7 +454,7 @@ void repaint_systray(int new_icon) {
 	} else {
 		wmsystray_resize(iconsize, iconsize);
 	}
-	
+
 	XSync (main_disp, False);
 	TRACE((stderr, "LEAVING: repaint_systray\n"));
 }
