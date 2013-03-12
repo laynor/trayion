@@ -1,4 +1,4 @@
-prefix=/usr
+prefix ?= /usr
 bindir = ${prefix}/bin
 mandir = ${prefix}/share/man
 INSTALL = /usr/bin/install
