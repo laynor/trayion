@@ -1,0 +1,17 @@
+Source: trayion
+Section: x11
+Priority: optional
+Maintainer: Paulo Matias <paulo.matias@usp.br>
+Build-Depends: debhelper (>= 9), libx11-dev
+Standards-Version: 3.9.5
+Homepage: https://github.com/laynor/trayion
+Vcs-Git: git://github.com/laynor/trayion.git
+
+Package: trayion
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: external system tray application for ion3
+ Trayion provides a notification area, or "system tray", in a manner compliant
+ with freedesktop.org's System Tray Protocol Specification. This allows trayion
+ to serve as a system tray area for recent GNOME and KDE applications, and
+ should work for applications from GNOME 2.x and later or KDE 3.x and later.
